@@ -1,0 +1,131 @@
+<configuration>
+
+    <!-- Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+             <pattern>%d %level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/app.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING_FILE_TIME_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <file>logs/app.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/app-%d{yyyy-MM-dd-HH-mm}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d %-5level %logger - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="ROLLING_FILE_SIZE_TIME_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <file>logs/app.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+
+            <fileNamePattern>
+                logs/app-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d %-5level %logger - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="DB_APPENDER" class="com.concepts.customappender.DbAppender">
+        <!-- encoder is not needed here -->
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+
+        <queueSize>1000</queueSize>
+        <discardingThreshold>10</discardingThreshold>
+
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- JSON encoder -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+
+            <!-- Masking decorator, we can have more than one decorator -->
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+
+                <!-- What masked value should look like -->
+                <defaultMask>*****</defaultMask>
+
+                <!-- Fields to mask -->
+                <path>password</path>
+                <path>token</path>
+                <path>creditCard</path>
+
+            </jsonGeneratorDecorator>
+
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_WITH_MDC" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %level %logger - %msg - %X{payment_id}%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_WITH_ALL_MDC" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %level %thread %logger - %msg - %X%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_WITH_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- JSON encoder -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdc>true</includeMdc> <!--by-default is true only -->
+        </encoder>
+    </appender>
+
+    <!-- Specific logger config-->
+    <logger name="com.concepts.PaymentController" level="INFO" additivity="false">
+<!--        <appender-ref ref="JSON_CONSOLE"/>-->
+<!--        <appender-ref ref="CONSOLE"/>-->
+<!--        <appender-ref ref="ROLLING_FILE_TIME_BASED"/>-->
+<!--        <appender-ref ref="ROLLING_FILE_SIZE_TIME_BASED"/>-->
+<!--        <appender-ref ref="DB_APPENDER"/>-->
+<!--        <appender-ref ref="ASYNC_FILE"/>-->
+<!--            <appender-ref ref="CONSOLE_WITH_MDC"/>-->
+            <appender-ref ref="CONSOLE_WITH_ALL_MDC"/>
+<!--            <appender-ref ref="CONSOLE_WITH_JSON"/>-->
+    </logger>
+
+    
+    <logger name="com.concepts.service.PaymentService" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE_WITH_ALL_MDC"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
+
+
